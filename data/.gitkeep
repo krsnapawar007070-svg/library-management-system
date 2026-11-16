@@ -1,0 +1,3 @@
+# Keeps the data/ directory in version control so that the SQLite database
+# can be initialized on first run by db.js.
+# Local SQLite database files (*.db) are ignored and should never be committed.

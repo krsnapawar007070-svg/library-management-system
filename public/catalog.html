@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Catalog — LMS</title>
+  <meta name="description" content="Search and browse the library catalog by title, author, or ISBN.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<div class="container page-content">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1>Explore the Library</h1>
+    <p>Find your next book from our collection — search by title, author, or ISBN.</p>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </span>
+      <input class="search-input" id="q" type="text"
+             placeholder="Search by title, author, or ISBN…"
+             aria-label="Search books">
+    </div>
+    <button id="searchBtn" onclick="search()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      Search
+    </button>
+    <a href="dashboard.html">
+      <button type="button" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0
+                   01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001
+                   1m-6 0h6"/>
+        </svg>
+        My Dashboard
+      </button>
+    </a>
+  </div>
+
+  <!-- Inline notice (errors) -->
+  <div id="notice"></div>
+
+  <!-- Results count + filter bar -->
+  <div id="resultsHeader" class="results-info" style="display:none">
+    Showing <strong id="resultCount">0</strong> books
+    <span id="filterBadge" style="margin-left:auto; display:flex; align-items:center; gap:8px">
+      <button type="button" class="btn-sm btn-ghost" id="filterAll" onclick="filterCards('all')" style="font-size:12px">All</button>
+      <button type="button" class="btn-sm btn-ghost" id="filterAvail" onclick="filterCards('available')" style="font-size:12px">Available only</button>
+    </span>
+  </div>
+
+  <div id="booksGrid" class="books-grid"></div>
+  <div id="emptyContainer" style="display:none"></div>
+
+</div>
+
+<script src="common.js"></script>
+<script>
+const user = getUser();
+if (user) {
+  renderTopbar(user, 'Browse Catalog');
+  verifySession();
+}
+
+// Allow Enter key to trigger search
+document.getElementById('q').addEventListener('keydown', e => {
+  if (e.key === 'Enter') search();
+});
+
+let _lastBooks = [];
+
+const SEARCH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round"
+  stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`;
+
+async function search() {
+  const q      = document.getElementById('q').value;
+  const btn    = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+    style="animation:spin 0.8s linear infinite"><path stroke-linecap="round"
+    stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0
+    0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Searching…`;
+
+  const res   = await fetch('/api/books?q=' + encodeURIComponent(q));
+  const books = await res.json();
+  _lastBooks  = books;
+
+  btn.disabled  = false;
+  btn.innerHTML = SEARCH_SVG + ' Search';
+
+  const grid   = document.getElementById('booksGrid');
+  const empty  = document.getElementById('emptyContainer');
+  const header = document.getElementById('resultsHeader');
+  const count  = document.getElementById('resultCount');
+
+  if (!books.length) {
+    grid.innerHTML  = '';
+    header.style.display = 'none';
+    empty.style.display  = 'block';
+    empty.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+       </svg>`,
+      'No books found',
+      q ? `No results for "${q}". Try a different search term.`
+        : 'The catalog appears to be empty.'
+    );
+    return;
+  }
+
+  empty.style.display  = 'none';
+  header.style.display = 'flex';
+  count.textContent    = books.length;
+
+  renderCards(books);
+}
+
+function renderCards(books) {
+  const grid = document.getElementById('booksGrid');
+  grid.innerHTML = books.map(b => {
+    const avail  = b.available_copies > 0;
+    const style  = bookCoverStyle(b.title);
+    const letter = (b.title[0] || 'B').toUpperCase();
+    return `
+      <div class="book-card">
+        <div class="book-cover" style="${style}">
+          <span class="book-letter">${letter}</span>
+        </div>
+        <div class="book-body">
+          <div class="book-title">${b.title}</div>
+          <div class="book-author">${b.author}</div>
+          <div class="book-isbn">${b.isbn}</div>
+        </div>
+        <div class="book-footer">
+          <span class="badge ${avail ? 'available' : 'unavailable'}">
+            ${avail ? b.available_copies + ' available' : 'Unavailable'}
+          </span>
+          <a href="book.html?id=${b.id}">
+            <button type="button" class="btn-sm ${avail ? '' : 'btn-secondary'}" style="white-space:nowrap">
+              View details
+            </button>
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterCards(type) {
+  document.getElementById('filterAll').classList.toggle('active', type === 'all');
+  document.getElementById('filterAvail').classList.toggle('active', type === 'available');
+  if (type === 'available') {
+    renderCards(_lastBooks.filter(b => b.available_copies > 0));
+  } else {
+    renderCards(_lastBooks);
+  }
+}
+
+// Load all books on page entry
+search();
+</script>
+
+</body>
+</html>

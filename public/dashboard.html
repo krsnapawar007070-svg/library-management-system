@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard — LMS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<div class="dash-layout">
+
+  <!-- ═══════════════════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section-label">Navigation</div>
+
+    <a class="sidebar-link" href="catalog.html">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      Browse Catalog
+    </a>
+
+    <a class="sidebar-link active" href="dashboard.html">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0
+                 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001
+                 1m-6 0h6"/>
+      </svg>
+      My Dashboard
+    </a>
+
+    <div class="sidebar-section-label">Sections</div>
+
+    <a class="sidebar-link" href="#loans">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3
+                 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5
+                 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5
+                 1.253v13C19.832 18.477 18.247 18 16.5
+                 18c-1.746 0-3.332.477-4.5 1.253"/>
+      </svg>
+      My Loans
+    </a>
+
+    <a class="sidebar-link" href="#reservations">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0
+                 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      Reservations
+    </a>
+
+    <a class="sidebar-link" href="#notifications">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0
+                 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0
+                 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      Notifications
+    </a>
+
+    <div class="sidebar-spacer"></div>
+
+    <button class="sidebar-link danger" onclick="logout()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0
+                 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      Log out
+    </button>
+
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════════════ -->
+  <main class="dash-main">
+
+    <!-- Greeting -->
+    <div class="page-header">
+      <h1 id="greetingTitle">Hello!</h1>
+      <p>Here's your library activity at a glance.</p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-grid">
+
+      <div class="stat-card blue-accent">
+        <div class="stat-icon blue">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3
+                     6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5
+                     1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5
+                     1.253v13C19.832 18.477 18.247 18 16.5
+                     18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="s-issued">–</div>
+        <div class="stat-label">Currently Borrowed</div>
+      </div>
+
+      <div class="stat-card amber-accent">
+        <div class="stat-icon amber">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="s-pending">–</div>
+        <div class="stat-label">Pending Requests</div>
+      </div>
+
+      <div class="stat-card navy-accent">
+        <div class="stat-icon navy">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2
+                     2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="s-reservations">–</div>
+        <div class="stat-label">Active Reservations</div>
+      </div>
+
+      <div class="stat-card red-accent">
+        <div class="stat-icon red">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3
+                     2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11
+                     0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="s-fines">–</div>
+        <div class="stat-label">Total Fines (₹)</div>
+      </div>
+
+    </div>
+
+    <!-- Loans -->
+    <div class="card" id="loans" style="scroll-margin-top:84px">
+      <div class="section-header">
+        <h2>My Loans</h2>
+        <a href="catalog.html">
+          <button type="button" class="btn-secondary btn-sm">Browse books</button>
+        </a>
+      </div>
+      <div id="loansContent">
+        <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Reservations -->
+    <div class="card" id="reservations" style="scroll-margin-top:84px">
+      <div class="section-header">
+        <h2>My Reservations</h2>
+      </div>
+      <div id="reservationsContent">
+        <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card" id="notifications" style="scroll-margin-top:84px; margin-bottom:0">
+      <div class="section-header">
+        <h2>Notifications</h2>
+      </div>
+      <div id="notifContent">
+        <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="common.js"></script>
+<script>
+const user  = getUser('student');
+if (user) {
+  renderTopbar(user, 'My Dashboard');
+  const firstName = user.name.split(' ')[0];
+  document.getElementById('greetingTitle').textContent = `Good to see you, ${firstName}!`;
+}
+
+const today = new Date().toISOString().slice(0, 10);
+
+async function load() {
+  if (!user) return;
+  const verified = await verifySession();
+  if (!verified) return;
+  const res = await fetch(`/api/student/${verified.id}/dashboard`);
+  if (res.status === 401 || res.status === 403) {
+    sessionStorage.removeItem('lms_user');
+    window.location.href = 'index.html';
+    return;
+  }
+  const { loans, reservations, notifications } = await res.json();
+
+  /* ── Stats ─────────────────────────────────────── */
+  const issued    = loans.filter(l => l.status === 'issued').length;
+  const pending   = loans.filter(l => l.status === 'pending').length;
+  const activeRes = reservations.filter(r => r.status === 'waiting').length;
+  const fines     = loans.reduce((s, l) => s + (l.fine || 0), 0);
+
+  document.getElementById('s-issued').textContent       = issued;
+  document.getElementById('s-pending').textContent      = pending;
+  document.getElementById('s-reservations').textContent = activeRes;
+  document.getElementById('s-fines').textContent        = fines;
+
+  /* ── Loans ──────────────────────────────────────── */
+  const loansEl = document.getElementById('loansContent');
+  if (!loans.length) {
+    loansEl.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3
+                  6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5
+                  1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5
+                  1.253v13C19.832 18.477 18.247 18 16.5
+                  18c-1.746 0-3.332.477-4.5 1.253"/>
+       </svg>`,
+      'No borrowing history yet',
+      'Start by browsing the catalog and requesting a book.'
+    );
+  } else {
+    loansEl.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Status</th>
+              <th>Issue Date</th>
+              <th>Due Date</th>
+              <th>Fine</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${loans.map(t => {
+              const overdue = t.status === 'issued' && t.due_date && t.due_date < today;
+              return `<tr class="${overdue ? 'row-overdue' : ''}">
+                <td class="td-title">${t.title}</td>
+                <td>${statusBadge(t.status, t.due_date)}</td>
+                <td class="td-muted">${t.issue_date || '—'}</td>
+                <td class="td-muted">${
+                  t.due_date
+                    ? (overdue
+                        ? `<span style="color:var(--danger);font-weight:600">${t.due_date}</span>`
+                        : t.due_date)
+                    : '—'
+                }</td>
+                <td>${
+                  t.fine
+                    ? `<span style="color:var(--danger);font-weight:600">₹${t.fine}</span>`
+                    : '—'
+                }</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  /* ── Reservations ───────────────────────────────── */
+  const resEl = document.getElementById('reservationsContent');
+  if (!reservations.length) {
+    resEl.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0
+                  00-2 2v12a2 2 0 002 2z"/>
+       </svg>`,
+      'No active reservations',
+      'When a book you want is unavailable, you can reserve it from its detail page.'
+    );
+  } else {
+    resEl.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Book</th><th>Reserved On</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            ${reservations.map(r => `
+              <tr>
+                <td class="td-title">${r.title}</td>
+                <td class="td-muted">${r.reserved_date}</td>
+                <td>${statusBadge(r.status)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  /* ── Notifications ──────────────────────────────── */
+  const notifEl = document.getElementById('notifContent');
+  if (!notifications.length) {
+    notifEl.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0
+                  00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0
+                  .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+       </svg>`,
+      'No notifications yet',
+      'You\'ll be notified when your requests are approved or books become available.'
+    );
+  } else {
+    notifEl.innerHTML = `
+      <div class="notif-list">
+        ${notifications.map(n => `
+          <div class="notif-item">
+            <div class="notif-dot"></div>
+            <div class="notif-msg">${n.message}</div>
+            <div class="notif-date">${n.created_at}</div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>

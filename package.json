@@ -1,0 +1,24 @@
+{
+  "name": "library-management-system",
+  "version": "1.0.0",
+  "description": "A full-stack Library Management System built using Node.js, Express.js, SQLite, HTML, CSS and JavaScript, featuring student registration, librarian approval, book management, borrowing and reservations.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "library-management-system",
+    "nodejs",
+    "express",
+    "sqlite",
+    "sqljs",
+    "javascript"
+  ],
+  "author": "Krishna",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "sql.js": "^1.14.2"
+  }
+}

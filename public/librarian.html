@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Administration — LMS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<div class="container page-content">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1>Library Administration</h1>
+    <p>Manage borrow requests, track issued books, and maintain the catalog.</p>
+  </div>
+
+  <!-- Stats row (populated by JS) -->
+  <div class="stats-grid">
+
+    <div class="stat-card amber-accent">
+      <div class="stat-icon amber">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="stat-value" id="s-pending">–</div>
+      <div class="stat-label">Pending Requests</div>
+    </div>
+
+    <div class="stat-card blue-accent">
+      <div class="stat-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0
+                   00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2
+                   2 0 012 2"/>
+        </svg>
+      </div>
+      <div class="stat-value" id="s-issued">–</div>
+      <div class="stat-label">Currently Issued</div>
+    </div>
+
+    <div class="stat-card navy-accent">
+      <div class="stat-icon navy">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3
+                   6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5
+                   1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5
+                   1.253v13C19.832 18.477 18.247 18 16.5
+                   18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+      </div>
+      <div class="stat-value" id="s-books">–</div>
+      <div class="stat-label">Total Book Titles</div>
+    </div>
+
+    <div class="stat-card green-accent">
+      <div class="stat-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <div class="stat-value" id="s-avail">–</div>
+      <div class="stat-label">Available Copies</div>
+    </div>
+
+  </div>
+
+  <!-- Notice (success / error) -->
+  <div id="notice"></div>
+
+  <!-- ── Tabs ─────────────────────────────────────── -->
+  <div class="tabs">
+    <button class="tab active" id="tbtn-requests"
+            onclick="showTab('requests', this)">
+      Pending Requests
+      <span id="pendingBadge"
+            style="display:none; background:var(--warning); color:white;
+                   border-radius:999px; font-size:10px; padding:1px 7px;
+                   margin-left:6px; font-weight:700; vertical-align:middle"></span>
+    </button>
+    <button class="tab" id="tbtn-issued" onclick="showTab('issued', this)">
+      Issued Books &amp; Returns
+    </button>
+    <button class="tab" id="tbtn-catalog" onclick="showTab('catalog', this)">
+      Manage Catalog
+    </button>
+    <button class="tab" id="tbtn-registrations" onclick="showTab('registrations', this)">
+      Student Registrations
+      <span id="regPendingBadge"
+            style="display:none; background:var(--warning); color:white;
+                   border-radius:999px; font-size:10px; padding:1px 7px;
+                   margin-left:6px; font-weight:700; vertical-align:middle"></span>
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       TAB: PENDING REQUESTS
+  ════════════════════════════════════════════════ -->
+  <div class="card" id="tab-requests" style="margin-bottom:0">
+    <div class="section-header">
+      <h2>Pending Borrow Requests</h2>
+      <span id="reqSubtitle" style="font-size:13px; color:var(--text-muted)"></span>
+    </div>
+    <div id="reqContent">
+      <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       TAB: ISSUED BOOKS
+  ════════════════════════════════════════════════ -->
+  <div class="card" id="tab-issued" style="display:none; margin-bottom:0">
+    <div class="section-header">
+      <h2>Currently Issued Books</h2>
+      <span id="issuedSubtitle" style="font-size:13px; color:var(--text-muted)"></span>
+    </div>
+    <div id="issuedContent">
+      <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       TAB: MANAGE CATALOG
+  ════════════════════════════════════════════════ -->
+  <div class="card" id="tab-catalog" style="display:none; margin-bottom:0">
+
+    <!-- Add book form -->
+    <h2 style="margin-bottom:18px">Add a New Book</h2>
+
+    <div class="card" style="background:var(--bg); margin-bottom:28px">
+      <div class="add-book-grid">
+        <div class="form-group">
+          <label class="form-label">Book Title</label>
+          <input id="newTitle" type="text" placeholder="e.g. Clean Code">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Author</label>
+          <input id="newAuthor" type="text" placeholder="e.g. Robert C. Martin">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ISBN</label>
+          <input id="newIsbn" type="text" placeholder="9780132350884">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Copies</label>
+          <input id="newCopies" type="number" min="1" placeholder="1">
+        </div>
+        <div style="align-self:end; padding-bottom:0">
+          <button class="btn-success" onclick="addBook()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Book
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Catalog table -->
+    <div class="section-header">
+      <h2>Full Catalog</h2>
+      <span id="catalogCount" style="font-size:13px; color:var(--text-muted)"></span>
+    </div>
+    <div id="catalogContent">
+      <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       TAB: STUDENT REGISTRATIONS & AUTHORIZED IDS
+  ════════════════════════════════════════════════ -->
+  <div class="card" id="tab-registrations" style="display:none; margin-bottom:0">
+
+    <!-- Authorize Student ID form -->
+    <h2 style="margin-bottom:18px">Authorize University Student ID</h2>
+
+    <div class="card" style="background:var(--bg); margin-bottom:28px">
+      <div class="auth-id-grid">
+        <div class="form-group">
+          <label class="form-label" for="authStudentId">University Student ID</label>
+          <input id="authStudentId" type="text" placeholder="e.g. STU2026001">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="authStudentNotes">Student Name / Notes (Optional)</label>
+          <input id="authStudentNotes" type="text" placeholder="e.g. Rahul Verma — B.Tech CSE">
+        </div>
+        <div style="align-self:end; padding-bottom:0">
+          <button class="btn-success" id="authorizeIdBtn" onclick="authorizeStudentId()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Authorize ID
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Authorized IDs list -->
+    <div class="section-header">
+      <h2>Authorized Student IDs</h2>
+      <span id="authIdCount" style="font-size:13px; color:var(--text-muted)"></span>
+    </div>
+    <div id="authIdsContent" style="margin-bottom:32px">
+      <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+    </div>
+
+    <!-- Student registration requests -->
+    <div class="section-header">
+      <h2>Student Registration Requests</h2>
+      <span id="regSubtitle" style="font-size:13px; color:var(--text-muted)"></span>
+    </div>
+    <div id="registrationsContent">
+      <div style="color:var(--text-muted); padding:20px 0; font-size:13.5px">Loading…</div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="common.js"></script>
+<script>
+const user    = getUser('librarian');
+if (user) renderTopbar(user, 'Library Administration');
+const todayS  = new Date().toISOString().slice(0, 10);
+
+/* ── Tab switching ───────────────────────────────── */
+function showTab(name, btn) {
+  ['requests', 'issued', 'catalog', 'registrations'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ── Notice banner ───────────────────────────────── */
+function showNotice(ok, msg) {
+  const icon = ok
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+       </svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667
+                  1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34
+                  16c-.77 1.333.192 3 1.732 3z"/>
+       </svg>`;
+  document.getElementById('notice').innerHTML =
+    `<div class="notice ${ok ? 'success' : 'error'}">${icon} ${msg}</div>`;
+  setTimeout(() => { document.getElementById('notice').innerHTML = ''; }, 5000);
+}
+
+/* ════════════════════════════════════════════════
+   PENDING REQUESTS
+════════════════════════════════════════════════ */
+async function loadRequests() {
+  const res  = await fetch('/api/librarian/requests');
+  const rows = await res.json();
+
+  document.getElementById('s-pending').textContent = rows.length;
+  document.getElementById('reqSubtitle').textContent =
+    rows.length === 1 ? '1 request awaiting review'
+    : rows.length > 0 ? `${rows.length} requests awaiting review`
+    : 'No pending requests';
+
+  const badge = document.getElementById('pendingBadge');
+  badge.style.display = rows.length ? 'inline' : 'none';
+  badge.textContent   = rows.length;
+
+  const el = document.getElementById('reqContent');
+  if (!rows.length) {
+    el.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+       </svg>`,
+      'All caught up!',
+      'There are no pending borrow requests at this time.'
+    );
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Book</th>
+            <th>Student</th>
+            <th>Requested on</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td class="td-title">${r.title}</td>
+              <td>${r.student_name}</td>
+              <td class="td-muted">${r.request_date}</td>
+              <td>
+                <div class="td-actions">
+                  <button class="btn-success btn-sm" onclick="approve(${r.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Approve
+                  </button>
+                  <button class="btn-danger btn-sm" onclick="reject(${r.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Reject
+                  </button>
+                </div>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function approve(id) {
+  const res  = await fetch('/api/librarian/approve/' + id, { method: 'POST' });
+  const data = await res.json();
+  showNotice(res.ok,
+    res.ok ? `Approved — due date: ${data.dueDate}` : data.error);
+  loadRequests();
+  loadIssued();
+}
+
+async function reject(id) {
+  if (!confirm('Are you sure you want to reject this borrow request?')) return;
+  const res  = await fetch('/api/librarian/reject/' + id, { method: 'POST' });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  loadRequests();
+}
+
+/* ════════════════════════════════════════════════
+   ISSUED BOOKS
+════════════════════════════════════════════════ */
+async function loadIssued() {
+  const res  = await fetch('/api/librarian/issued');
+  const rows = await res.json();
+
+  document.getElementById('s-issued').textContent    = rows.length;
+  document.getElementById('issuedSubtitle').textContent =
+    rows.length > 0
+      ? `${rows.filter(r => r.due_date < todayS).length} overdue`
+      : 'All books returned';
+
+  const el = document.getElementById('issuedContent');
+  if (!rows.length) {
+    el.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0
+                  00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2
+                  2 0 012 2"/>
+       </svg>`,
+      'No books currently issued',
+      'All books have been returned or no requests have been approved yet.'
+    );
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Book</th>
+            <th>Student</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => {
+            const late = r.due_date < todayS;
+            return `<tr class="${late ? 'row-overdue' : ''}">
+              <td class="td-title">${r.title}</td>
+              <td>${r.student_name}</td>
+              <td class="td-muted">${r.issue_date}</td>
+              <td class="td-muted">
+                ${late
+                  ? `<span style="color:var(--danger);font-weight:600">${r.due_date}</span>
+                     <span class="badge overdue" style="margin-left:6px">Overdue</span>`
+                  : r.due_date}
+              </td>
+              <td>${late
+                ? `<span class="badge overdue">Overdue</span>`
+                : `<span class="badge issued">Active</span>`}
+              </td>
+              <td>
+                <button class="btn-secondary btn-sm" onclick="returnBook(${r.id})">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                  </svg>
+                  Mark returned
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function returnBook(id) {
+  const res  = await fetch('/api/librarian/return/' + id, { method: 'POST' });
+  const data = await res.json();
+  showNotice(res.ok,
+    res.ok
+      ? `Return recorded${data.fine ? ' — fine of ₹' + data.fine + ' applied' : ''}`
+      : data.error);
+  loadIssued();
+}
+
+/* ════════════════════════════════════════════════
+   CATALOG
+════════════════════════════════════════════════ */
+async function loadCatalog() {
+  const res  = await fetch('/api/librarian/catalog');
+  const rows = await res.json();
+
+  document.getElementById('s-books').textContent =
+    rows.length;
+  document.getElementById('s-avail').textContent =
+    rows.reduce((s, b) => s + b.available_copies, 0);
+  document.getElementById('catalogCount').textContent =
+    `${rows.length} titles`;
+
+  const el = document.getElementById('catalogContent');
+  if (!rows.length) {
+    el.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+       </svg>`,
+      'Catalog is empty',
+      'Add your first book using the form above.'
+    );
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Available / Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(b => `
+            <tr>
+              <td class="td-title">${b.title}</td>
+              <td style="color:var(--text-muted)">${b.author}</td>
+              <td class="td-mono">${b.isbn}</td>
+              <td>
+                <span class="badge ${b.available_copies > 0 ? 'available' : 'unavailable'}">
+                  ${b.available_copies} / ${b.total_copies}
+                </span>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function addBook() {
+  const title  = document.getElementById('newTitle').value.trim();
+  const author = document.getElementById('newAuthor').value.trim();
+  const isbn   = document.getElementById('newIsbn').value.trim();
+  const copies = parseInt(document.getElementById('newCopies').value, 10);
+
+  if (!title || !author || !isbn || !copies || copies < 1) {
+    showNotice(false, 'Please fill in all fields with valid values.');
+    return;
+  }
+
+  const res  = await fetch('/api/librarian/catalog', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ title, author, isbn, copies })
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    showNotice(true, `"${title}" has been added to the catalog.`);
+    document.getElementById('newTitle').value  = '';
+    document.getElementById('newAuthor').value = '';
+    document.getElementById('newIsbn').value   = '';
+    document.getElementById('newCopies').value = '';
+    loadCatalog();
+  } else {
+    showNotice(false, data.error);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   AUTHORIZED STUDENT IDS & REGISTRATIONS
+════════════════════════════════════════════════ */
+async function loadAuthorizedIds() {
+  const res = await fetch('/api/librarian/authorized-ids');
+  if (res.status === 401 || res.status === 403) return;
+  const rows = await res.json();
+
+  document.getElementById('authIdCount').textContent =
+    rows.length === 1 ? '1 ID configured' : `${rows.length} IDs configured`;
+
+  const el = document.getElementById('authIdsContent');
+  if (!rows.length) {
+    el.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0
+                  00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"/>
+       </svg>`,
+      'No authorized Student IDs yet',
+      'Add a University Student ID above before students can self-register.'
+    );
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Notes</th>
+            <th>Status</th>
+            <th>Registered Account</th>
+            <th>Added On</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td class="td-mono" style="font-weight:600; color:var(--text)">${escapeHtml(r.student_id)}</td>
+              <td class="td-muted">${r.notes ? escapeHtml(r.notes) : '—'}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td class="td-muted">${r.used_by_name ? `${escapeHtml(r.used_by_name)} (${escapeHtml(r.used_by_email)})` : '—'}</td>
+              <td class="td-muted">${escapeHtml(r.created_at)}</td>
+              <td>
+                ${r.status === 'unused'
+                  ? `<button class="btn-danger btn-sm" onclick="removeAuthorizedId(${r.id})">Remove</button>`
+                  : `<span class="td-muted">—</span>`}
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function authorizeStudentId() {
+  const studentId = document.getElementById('authStudentId').value.trim();
+  const notes     = document.getElementById('authStudentNotes').value.trim();
+
+  if (!studentId) {
+    showNotice(false, 'Please enter a University Student ID to authorize.');
+    return;
+  }
+
+  const res  = await fetch('/api/librarian/authorized-ids', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ studentId, notes })
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    showNotice(true, `Student ID "${data.student_id}" has been authorized.`);
+    document.getElementById('authStudentId').value    = '';
+    document.getElementById('authStudentNotes').value = '';
+    loadAuthorizedIds();
+  } else {
+    showNotice(false, data.error || 'Could not authorize Student ID.');
+  }
+}
+
+async function removeAuthorizedId(id) {
+  const res  = await fetch('/api/librarian/authorized-ids/' + id, { method: 'DELETE' });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  loadAuthorizedIds();
+}
+
+async function loadRegistrations() {
+  const res = await fetch('/api/librarian/registrations');
+  if (res.status === 401 || res.status === 403) return;
+  const rows = await res.json();
+
+  const pendingCount = rows.filter(r => r.membership_status === 'pending').length;
+  const badge = document.getElementById('regPendingBadge');
+  badge.style.display = pendingCount ? 'inline' : 'none';
+  badge.textContent   = pendingCount;
+
+  document.getElementById('regSubtitle').textContent =
+    pendingCount === 1 ? '1 pending verification'
+    : pendingCount > 0 ? `${pendingCount} pending verification`
+    : `${rows.length} total registrations`;
+
+  const el = document.getElementById('registrationsContent');
+  if (!rows.length) {
+    el.innerHTML = emptyState(
+      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3
+                  20a6 6 0 0112 0v1H3v-1z"/>
+       </svg>`,
+      'No student registration requests yet',
+      'Self-registered students will appear here for approval.'
+    );
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Student ID</th>
+            <th>Email</th>
+            <th>Registered On</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td class="td-title">${escapeHtml(r.name)}</td>
+              <td class="td-mono">${escapeHtml(r.student_id)}</td>
+              <td class="td-muted">${escapeHtml(r.email)}</td>
+              <td class="td-muted">${r.created_at ? escapeHtml(r.created_at) : '—'}</td>
+              <td>${statusBadge(r.membership_status)}</td>
+              <td>
+                ${r.membership_status === 'pending'
+                  ? `<div class="td-actions">
+                       <button class="btn-success btn-sm" onclick="approveRegistration(${r.id})">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                         </svg>
+                         Approve
+                       </button>
+                       <button class="btn-danger btn-sm" onclick="rejectRegistration(${r.id})">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                         </svg>
+                         Reject
+                       </button>
+                     </div>`
+                  : `<span class="td-muted">—</span>`}
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function approveRegistration(id) {
+  const res  = await fetch(`/api/librarian/registrations/${id}/approve`, { method: 'POST' });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  loadRegistrations();
+  loadAuthorizedIds();
+}
+
+async function rejectRegistration(id) {
+  if (!confirm('Are you sure you want to reject this student registration?')) return;
+  const res  = await fetch(`/api/librarian/registrations/${id}/reject`, { method: 'POST' });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  loadRegistrations();
+  loadAuthorizedIds();
+}
+
+/* ── Initial data load ───────────────────────────── */
+async function initDashboard() {
+  if (!user) return;
+  const verified = await verifySession();
+  if (!verified || verified.role !== 'librarian') return;
+  loadRequests();
+  loadIssued();
+  loadCatalog();
+  loadAuthorizedIds();
+  loadRegistrations();
+}
+initDashboard();
+</script>
+
+</body>
+</html>

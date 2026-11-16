@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Details — LMS</title>
+  <meta name="description" content="View book details, check availability and request to borrow or reserve books.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topbar"></div>
+
+<div class="container page-content">
+
+  <a class="back-link" href="catalog.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to catalog
+  </a>
+
+  <!-- Populated by load() -->
+  <div id="bookContent"></div>
+
+  <!-- Notice banner (success / error after action) -->
+  <div id="notice"></div>
+
+</div>
+
+<script src="common.js"></script>
+<script>
+const user   = getUser();
+if (user) {
+  renderTopbar(user, 'Book Details');
+  verifySession();
+}
+const bookId = new URLSearchParams(window.location.search).get('id');
+
+async function load() {
+  document.getElementById('bookContent').innerHTML =
+    `<div style="color:var(--text-muted);padding:32px 0">Loading…</div>`;
+
+  const res = await fetch('/api/books/' + bookId);
+  if (!res.ok) {
+    document.getElementById('bookContent').innerHTML =
+      `<div class="notice error"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Book not found.</div>`;
+    return;
+  }
+
+  const b      = await res.json();
+  const avail  = b.available_copies > 0;
+  const style  = bookCoverStyle(b.title);
+  const letter = (b.title[0] || 'B').toUpperCase();
+
+  document.title = `${b.title} — LMS`;
+
+  document.getElementById('bookContent').innerHTML = `
+    <div class="book-detail-grid">
+
+      <!-- ── Left: cover + availability ── -->
+      <div>
+        <div class="book-cover-xl" style="${style}">
+          <span class="book-cover-xl-letter">${letter}</span>
+        </div>
+        <div style="text-align:center; margin-top:16px">
+          <span class="badge ${avail ? 'available' : 'unavailable'}"
+                style="font-size:13px; padding:5px 18px">
+            ${avail
+              ? b.available_copies + ' of ' + b.total_copies + ' available'
+              : 'Currently unavailable'}
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Right: info + action ── -->
+      <div style="display:flex; flex-direction:column; gap:22px">
+
+        <!-- Title & author -->
+        <div>
+          <h1 style="font-size:28px; font-weight:800; color:var(--text);
+                     margin-bottom:6px; line-height:1.15">${b.title}</h1>
+          <p style="font-size:17px; color:var(--text-muted); font-weight:500">${b.author}</p>
+        </div>
+
+        <!-- Meta table -->
+        <div class="card" style="margin-bottom:0">
+          <table class="book-meta-table">
+            <tr>
+              <td>ISBN</td>
+              <td><span style="font-family:monospace">${b.isbn}</span></td>
+            </tr>
+            <tr>
+              <td>Total copies</td>
+              <td>${b.total_copies}</td>
+            </tr>
+            <tr>
+              <td>Available</td>
+              <td>
+                <strong style="color:${avail ? 'var(--success)' : 'var(--danger)'}">
+                  ${b.available_copies}
+                </strong>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Action box -->
+        <div class="action-box">
+          <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:16px; line-height:1.6">
+            ${avail
+              ? 'This book is currently available. Submit a borrow request and a librarian will review and approve it within their next login.'
+              : 'All copies are checked out. You can reserve this book — you\'ll receive a notification when a copy becomes available.'}
+          </p>
+          ${avail
+            ? `<button class="btn-lg" id="actionBtn" onclick="borrow()">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                   <path stroke-linecap="round" stroke-linejoin="round"
+                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3
+                            6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5
+                            1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5
+                            1.253v13C19.832 18.477 18.247 18 16.5
+                            18c-1.746 0-3.332.477-4.5 1.253"/>
+                 </svg>
+                 Request to Borrow
+               </button>`
+            : `<button class="btn-secondary btn-lg" id="actionBtn" onclick="reserve()">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                   <path stroke-linecap="round" stroke-linejoin="round"
+                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0
+                            00-2 2v12a2 2 0 002 2z"/>
+                 </svg>
+                 Reserve This Book
+               </button>`}
+        </div>
+
+        <!-- Informational note -->
+        <div class="info-box">
+          <strong>How borrowing works:</strong> Approved loans are issued for
+          <strong>14 days</strong>. Overdue returns incur a fine of
+          <strong>₹5 per day</strong>. Reserved books become available when a
+          copy is returned, and you'll receive a notification automatically.
+        </div>
+
+      </div>
+    </div>`;
+}
+
+/* ── API calls (identical to original) ───────────────────────── */
+async function borrow() {
+  const btn = document.getElementById('actionBtn');
+  if (btn) btn.disabled = true;
+  const res  = await fetch('/api/borrow', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ studentId: user.id, bookId })
+  });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  if (res.ok) load();
+  else if (btn) btn.disabled = false;
+}
+
+async function reserve() {
+  const btn = document.getElementById('actionBtn');
+  if (btn) btn.disabled = true;
+  const res  = await fetch('/api/reserve', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ studentId: user.id, bookId })
+  });
+  const data = await res.json();
+  showNotice(res.ok, data.message || data.error);
+  if (btn) btn.disabled = false;
+}
+
+function showNotice(ok, msg) {
+  const icon = ok
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+       </svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+         <path stroke-linecap="round" stroke-linejoin="round"
+               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667
+                  1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34
+                  16c-.77 1.333.192 3 1.732 3z"/>
+       </svg>`;
+  document.getElementById('notice').innerHTML =
+    `<div class="notice ${ok ? 'success' : 'error'}" style="margin-top:20px">${icon} ${msg}</div>`;
+}
+
+load();
+</script>
+
+</body>
+</html>
