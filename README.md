@@ -161,6 +161,8 @@ The application initializes with pre-configured demo accounts for testing and ev
 library-management-system/
 ├── data/
 │   └── .gitkeep              # Preserves directory structure; local .db files are gitignored
+├── docs/
+│   └── screenshots/          # Application UI previews for documentation
 ├── public/
 │   ├── book.html             # Screen: Book details, borrow request & reservation actions
 │   ├── catalog.html          # Screen: Searchable book catalog with filters
@@ -183,15 +185,23 @@ library-management-system/
 
 ## Screenshots
 
-*(Place application screenshots in a `docs/screenshots/` directory or link your hosted images below)*
+### 1. Authentication & Onboarding
 
-| Login Portal | Book Catalog |
+| Login Portal | Student Registration |
 |:---:|:---:|
-| ![Login Screen](docs/screenshots/login.png) | ![Catalog Screen](docs/screenshots/catalog.png) |
+| ![Login Screen](docs/screenshots/login.png) | ![Student Registration Screen](docs/screenshots/register.png) |
 
-| Student Dashboard | Librarian Admin Panel |
+### 2. Student Experience
+
+| Book Catalog & Real-Time Availability | Student Dashboard & Loan History |
 |:---:|:---:|
-| ![Dashboard Screen](docs/screenshots/dashboard.png) | ![Librarian Screen](docs/screenshots/librarian.png) |
+| ![Catalog Screen](docs/screenshots/catalog.png) | ![Dashboard Screen](docs/screenshots/dashboard.png) |
+
+### 3. Librarian Administration & Verification
+
+| Librarian Administration Panel |
+|:---:|
+| ![Librarian Screen](docs/screenshots/librarian.png) |
 
 ---
 
